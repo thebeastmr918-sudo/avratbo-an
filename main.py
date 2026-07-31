@@ -4,12 +4,15 @@ from discord.ext import commands
 from openai import OpenAI
 
 TOKEN = os.getenv("DISCORD_TOKEN")
-OPENAI_KEY = os.getenv("OPENAI_API_KEY")
+GROQ_KEY = os.getenv("GROQ_API_KEY")
 
-if not TOKEN or not OPENAI_KEY:
-    raise RuntimeError("DISCORD_TOKEN veya OPENAI_API_KEY eksik!")
+if not TOKEN or not GROQ_KEY:
+    raise RuntimeError("DISCORD_TOKEN veya GROQ_API_KEY eksik!")
 
-client = OpenAI(api_key=OPENAI_KEY)
+client = OpenAI(
+    api_key=GROQ_KEY,
+    base_url="https://api.groq.com/openai/v1"
+)
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -47,7 +50,7 @@ async def on_message(message):
     async with message.channel.typing():
         try:
             response = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="llama-3.3-70b-versatile",
                 messages=[
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": content},
