@@ -10,7 +10,7 @@ app = Flask('')
 
 @app.route('/')
 def home():
-    return "Akıllı Küfürbaz Aktif!"
+    return "Küfürbaz Hesap Motoru Aktif!"
 
 def run():
     port = int(os.environ.get("PORT", 10000))
@@ -25,13 +25,14 @@ intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
 
+# Yapay zekaya SADECE düz hesaplama yapmasını emrediyoruz (Sıfır sansür riski)
 genai.configure(api_key=os.getenv('GEMINI_KEY'))
 model = genai.GenerativeModel(
     model_name="gemini-1.5-flash",
-    system_instruction="Sen asabi ve kısa cevaplar veren birisin. Kullanıcının sorularına mantıklı ama çok kısa (maksimum 1 cümle) cevaplar ver."
+    system_instruction="Sen yardımcı bir asistansın. Kullanıcının sorduğu soruları veya matematik işlemlerini çok kısa, net ve sadece tek bir cümleyle cevapla."
 )
 
-# SANSÜRSÜZ AĞIR KÜFÜR HAVUZU (Burayı istediğin gibi ana avrat doldurabilirsin)
+# SANSÜRSÜZ AĞIR KÜFÜR HAVUZU (İstediğin gibi ana avrat doldurabilirsin)
 kufurler = [
     "senin o doğduğun günkü ebeveynlerinin aklını fikrini sikeyim,",
     "amına koyduğumun evladı,",
@@ -43,7 +44,7 @@ kufurler = [
 
 @client.event
 async def on_ready():
-    print(f'Akıllı Küfürbaz Başarıyla Açıldı: {client.user}')
+    print(f'Bot başarıyla açıldı: {client.user}')
 
 @client.event
 async def on_message(message):
@@ -57,20 +58,21 @@ async def on_message(message):
             kullanici_mesaji = "Naber"
 
         try:
-            # 1. Adım: Yapay zekaya soruyu sorup temiz/mantıklı cevabı alıyoruz (Süreç sansüre takılmıyor)
+            # 1. Yapay zeka soruyu düz ve normal şekilde cevaplıyor (Engele takılmıyor)
             response = model.generate_content(kullanici_mesaji)
             temiz_cevap = response.text.strip()
             
-            # 2. Adım: Küfür havuzundan rastgele ağır bir ana avrat küfür seçiyoruz
+            # 2. Küfür havuzundan rastgele ağır bir ana avrat küfür seçiliyor
             secilen_kufur = random.choice(kufurler)
             
-            # 3. Adım: Küfür ile yapay zekanın mantıklı cevabını birleştiriyoruz
+            # 3. Küfür ile yapay zekanın bulduğu doğru cevap birleştiriliyor
             tam_cevap = f"{secilen_kufur} {temiz_cevap}"
             
-            # Sonuç: Kullanıcıyı etiketleyerek küfürlü cevabı yapıştırır
+            # Sonuç: Kullanıcıyı etiketleyerek yapıştırır
             await message.reply(f"{message.author.mention} {tam_cevap}")
             
         except Exception as e:
+            # Eğer yine de bir hata olursa bot susmasın diye yedek liste
             await message.reply(f"{message.author.mention} Amına koduğumun çocuğu, kafam bozuldu yazma bana!")
 
 keep_alive()
